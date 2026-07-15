@@ -39,7 +39,7 @@ if st.button("🚀 Extrair Plano de Ação", type="primary"):
                 
                 # Escolhe o melhor modelo disponível na sua conta
                 modelo_escolhido = None
-                for opcao in ["models/gemini-2.5-flash", "models/gemini-2.0-flash", "models/gemini-1.5-flash", "models/gemini-1.5-pro"]:
+                for opcao in ["models/gemini-2.0-flash", "models/gemini-1.5-flash", "models/gemini-1.5-pro"]:
                     if opcao in modelos_disponiveis:
                         modelo_escolhido = opcao
                         break
