@@ -3,7 +3,7 @@ import google.generativeai as genai
 import json
 import pandas as pd
 
-# Configuração visual da página do seu site
+# Configuração visual da página
 st.set_page_config(page_title="Extrator de Reuniões IA", page_icon="📝", layout="wide")
 
 st.title("📝 Extrator de Reuniões com IA")
@@ -12,7 +12,6 @@ st.subheader("Transforme transcrições brutas em planos de ação organizados e
 # Busca a chave secreta do Gemini (de forma oculta e segura)
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
-# Se o site não tiver a chave salva de forma segura nas configurações dele, permite digitar na tela
 if not api_key:
     st.sidebar.warning("Chave da API do Gemini não configurada nos bastidores do site.")
     api_key = st.sidebar.text_input("Insira sua Gemini API Key:", type="password")
@@ -34,10 +33,28 @@ if st.button("🚀 Extrair Plano de Ação", type="primary"):
     else:
         with st.spinner("Analisando transcrição e mapeando responsáveis..."):
             try:
-                # Usando o modelo rápido e de uso gratuito para desenvolvedores
-                model = genai.GenerativeModel("gemini-1.5-flash-latest")
+                # DETECÇÃO AUTOMÁTICA DE MODELO DISPONÍVEL:
+                # O código abaixo lista os modelos liberados na sua chave e escolhe um compatível
+                modelos_disponiveis = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
                 
-                # O prompt que dita as regras para a Inteligência Artificial
+                # Escolhe o melhor modelo disponível na sua conta
+                modelo_escolhido = None
+                for opcao in ["models/gemini-2.5-flash", "models/gemini-2.0-flash", "models/gemini-1.5-flash", "models/gemini-1.5-pro"]:
+                    if opcao in modelos_disponiveis:
+                        modelo_escolhido = opcao
+                        break
+                
+                # Se não achar nenhum dos preferidos, pega o primeiro compatível que estiver na lista
+                if not modelo_escolhido and modelos_disponiveis:
+                    modelo_escolhido = modelos_disponiveis[0]
+                
+                if not modelo_escolhido:
+                    raise Exception("Nenhum modelo compatível com geração de conteúdo foi encontrado na sua conta do Gemini.")
+                
+                # Inicializa o modelo que a sua conta realmente tem acesso
+                model = genai.GenerativeModel(modelo_escolhido)
+                
+                # Prompt que dita as regras para a Inteligência Artificial
                 prompt = (
                     "Você é um assistente especialista em gerenciamento de projetos.\n"
                     "Sua tarefa é analisar a transcrição de reunião abaixo e extrair EXCLUSIVAMENTE as ações práticas acordadas.\n\n"
@@ -68,7 +85,7 @@ if st.button("🚀 Extrair Plano de Ação", type="primary"):
                 
                 if dados_acoes:
                     df = pd.DataFrame(dados_acoes)
-                    st.success("🎉 Plano de ação gerado com sucesso!")
+                    st.success(f"🎉 Plano de ação gerado com sucesso usando o modelo: {modelo_escolhido}!")
                     
                     # Exibe a tabela linda e formatada no site
                     st.dataframe(df, use_container_width=True)
