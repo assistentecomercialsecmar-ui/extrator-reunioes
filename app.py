@@ -35,7 +35,7 @@ if st.button("🚀 Extrair Plano de Ação", type="primary"):
         with st.spinner("Analisando transcrição e mapeando responsáveis..."):
             try:
                 # Usando o modelo rápido e de uso gratuito para desenvolvedores
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                model = genai.GenerativeModel("models/gemini-1.5-flash")
                 
                 # O prompt que dita as regras para a Inteligência Artificial
                 prompt = (
